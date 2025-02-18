@@ -1,8 +1,13 @@
-import express from "express";
+import express, { Request, Response } from "express";
+import cors from "cors";
+
 const app = express();
 const port = 3000;
 
-app.get("/", (req, res) => {
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });
 
