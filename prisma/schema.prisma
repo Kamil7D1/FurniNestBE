@@ -12,7 +12,7 @@ model Customer {
   firstName String
   lastName String
   email String @unique
-  passwprd String
+  password String
   role Role @default(CUSTOMER)
 }
 
