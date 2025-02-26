@@ -1,13 +1,7 @@
 import { PrismaClient, Prisma } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "../src/utils/hash";
 
 const prisma = new PrismaClient();
-
-async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  return hashedPassword;
-}
 
 const customerData: Prisma.CustomerCreateInput[] = [
   {
