@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -7,7 +7,7 @@ import { hashPassword } from "../utils/hash";
 
 const secretKey = process.env.SECRET_KEY as string;
 
-export const login = async (
+export const loginCustomer = async (
   req: TypedRequestBody<{ email: string; password: string }>,
   res: Response
 ): Promise<void> => {
@@ -51,7 +51,7 @@ export const login = async (
   }
 };
 
-export const register = async (
+export const registerCustomer = async (
   req: TypedRequestBody<{
     firstName: string;
     lastName: string;
@@ -104,6 +104,91 @@ export const register = async (
     );
 
     res.json({ token });
+    return;
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({ message: "Internal Server Error" });
+    return;
+  }
+};
+
+export const updateCustomer = async (
+  req: TypedRequestBody<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    password?: string;
+  }>,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, password } = req.body;
+
+    const customer = await prisma.customer.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!customer) {
+      res.status(404).json({ message: "User Not Found" });
+      return;
+    }
+
+    if (email && email !== customer.email) {
+      const existingCustomer = await prisma.customer.findUnique({
+        where: { email },
+      });
+
+      if (existingCustomer) {
+        res.status(400).json({ message: "Email already in use" });
+        return;
+      }
+    }
+
+    const updatedCustomer = await prisma.customer.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        firstName: firstName ?? customer.firstName,
+        lastName: lastName ?? customer.lastName,
+        email: email ?? customer.email,
+        password: password ? await hashPassword(password) : customer.password,
+      },
+    });
+
+    res.json(updatedCustomer);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({ message: "Internal Server Error" });
+    return;
+  }
+};
+
+export const deleteCustomer = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const customer = await prisma.customer.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!customer) {
+      res.status(404).json({ message: "User Not Found" });
+      return;
+    }
+
+    await prisma.customer.delete({ where: { id: parseInt(id) } });
+
+    res.status(200).json({ message: "Customer deleted" });
+    return;
   } catch (error) {
     console.error(error);
 

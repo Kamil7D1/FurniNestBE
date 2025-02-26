@@ -1,7 +1,14 @@
 import { Router } from "express";
-import { login, register } from "./../controllers/customerController";
+import {
+  deleteCustomer,
+  loginCustomer,
+  registerCustomer,
+  updateCustomer,
+} from "./../controllers/customerController";
 
 export const customerRoutes: Router = Router();
 
-customerRoutes.post("/login", login);
-customerRoutes.post("/register", register);
+customerRoutes.post("/login", loginCustomer);
+customerRoutes.post("/register", registerCustomer);
+customerRoutes.put("/:id", updateCustomer);
+customerRoutes.delete("/:id", deleteCustomer);
