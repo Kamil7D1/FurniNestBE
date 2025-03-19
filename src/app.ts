@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
 import { customerRoutes } from "./routes/customerRoutes";
@@ -17,6 +18,7 @@ const port = 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");

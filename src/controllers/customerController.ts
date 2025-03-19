@@ -52,6 +52,11 @@ export const loginCustomer = async (
       expiresIn: "1d",
     });
 
+    await prisma.customer.update({
+      where: { email: customer.email },
+      data: { refreshToken: refreshToken },
+    });
+
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       sameSite: "none",
@@ -98,7 +103,7 @@ export const registerCustomer = async (
 
     const hashedPassword = await hashPassword(password);
 
-    const customer = await prisma.customer.create({
+    await prisma.customer.create({
       data: {
         firstName,
         lastName,
@@ -108,18 +113,8 @@ export const registerCustomer = async (
       },
     });
 
-    const token = jwt.sign(
-      {
-        sub: customer.id,
-        role: customer.role,
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 60 * 60,
-      },
-      secretKey,
-      { algorithm: "HS256" }
-    );
+    res.status(201).json({ message: "Customer registered successfully" });
 
-    res.json({ token });
     return;
   } catch (error) {
     console.error(error);
