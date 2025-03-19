@@ -32,18 +32,33 @@ export const loginCustomer = async (
       return;
     }
 
-    const token = jwt.sign(
-      {
-        sub: customer.id,
-        role: customer.role,
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 60 * 60,
-      },
-      secretKey,
-      { algorithm: "HS256" }
-    );
+    const payload = {
+      id: customer.id,
+      email: customer.email,
+      role: customer.role,
+    };
 
-    res.json({ token });
+    if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET) {
+      throw new Error(
+        "ACCESS_TOKEN_SECRET or REFRESH_TOKEN_SECRET is not set in the environment variables"
+      );
+    }
+
+    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "60s",
+    });
+
+    const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.json({ accessToken });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -89,6 +104,7 @@ export const registerCustomer = async (
         lastName,
         email,
         password: hashedPassword,
+        refreshToken: null,
       },
     });
 

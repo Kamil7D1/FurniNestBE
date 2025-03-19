@@ -4,13 +4,13 @@ import dotenv from "dotenv";
 
 import { customerRoutes } from "./routes/customerRoutes";
 
-dotenv.config();
+// dotenv.config();
 
-const secretKey = process.env.SECRET_KEY;
-if (!secretKey) {
-  console.error("ERROR: SECRET_KEY is not defined in environment variables");
-  process.exit(1);
-}
+// const secretKey = process.env.SECRET_KEY;
+// if (!secretKey) {
+//   console.error("ERROR: SECRET_KEY is not defined in environment variables");
+//   process.exit(1);
+// }
 
 const app = express();
 const port = 3000;
